@@ -1,4 +1,4 @@
-#include "grissom_custom_quadrature.h"
+#include "custom_quadrature.h"
 #include "ChiLua/chi_lua.h"
 
 #include <fstream>
@@ -10,7 +10,7 @@ extern ChiLog& chi_log;
 #include "ChiMath/chi_math.h"
 extern ChiMath& chi_math_handler;
 
-void chi_math::GrissomCustomQuadrature::
+void chi_math::CustomQuadrature::
   BuildDiscreteToMomentOperator(int scatt_order, bool oneD)
 {
   chi_log.Log() << "Hello";
@@ -69,7 +69,7 @@ void chi_math::GrissomCustomQuadrature::
 
   chi_log.Log() << "Goodbye";
 }
-void chi_math::GrissomCustomQuadrature::BuildMomentToDiscreteOperator(int scatt_order, bool oneD)
+void chi_math::CustomQuadrature::BuildMomentToDiscreteOperator(int scatt_order, bool oneD)
 {
     chi_log.Log() << "Hello";
 
@@ -156,7 +156,7 @@ int chiCreateGrissomCustomQuadrature(lua_State* L)
         exit(EXIT_FAILURE);
     }
 
-    auto new_quad = std::make_shared<chi_math::GrissomCustomQuadrature>(quad_file, M2D_file, D2M_file);
+    auto new_quad = std::make_shared<chi_math::CustomQuadrature>(quad_file, M2D_file, D2M_file);
     chi_math::QuadraturePointPhiTheta q_points;
 
     float a;
