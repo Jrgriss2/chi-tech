@@ -10,63 +10,64 @@ extern ChiLog& chi_log;
 #include "ChiMath/chi_math.h"
 extern ChiMath& chi_math_handler;
 
-void chi_math::GrissomCustomQuadrature::BuildDiscreteToMomentOperator(int scatt_order, bool oneD)
+void chi_math::GrissomCustomQuadrature::
+  BuildDiscreteToMomentOperator(int scatt_order, bool oneD)
 {
-    chi_log.Log() << "Hello";
+  chi_log.Log() << "Hello";
 
-    int num_angles = abscissae.size();
-    int num_moms = 0;
-    float a;
+  int num_angles = abscissae.size();
+  int num_moms = 0;
+  float a;
 
-    d2m_op.clear();
+  d2m_op.clear();
 
-    std::ifstream file;
-    file.open(filename);
-    if (not file.is_open())
+  std::ifstream file;
+  file.open(D2M_file);
+  if (not file.is_open())
+  {
+    chi_log.Log(LOG_ALLERROR) << "Failed to open Quadrature File in call to " << __FUNCTION__ << ".";
+    exit(EXIT_FAILURE);
+  }
+
+  int mc=-1; //moment count
+  for (int ell=0; ell<=scatt_order; ell++)
+  {
+    for (int m = -ell; m <= ell; m++)
     {
-        chi_log.Log(LOG_ALLERROR) << "Failed to open Quadrature File in call to " << __FUNCTION__ << ".";
-        exit(EXIT_FAILURE);
+      std::vector<double> cur_mom; mc++;
+      num_moms++;
+
+      for (int n = 0; n < num_angles; n++)
+      {
+        file >> a;
+        double value = a;
+        cur_mom.push_back(value);
+//      chi_log.Log() << value;
+      }
+
+      d2m_op.push_back(cur_mom);
+    }//for m
+  }//for ell
+
+  std::stringstream outs;
+  outs
+          << "\nQuadrature d2m operator:\n";
+  for (int n=0; n<num_angles; n++)
+  {
+    outs << std::setw(5) << n;
+    for (int m=0; m<num_moms; m++)
+    {
+      outs
+              << std::setw(15) << std::left << std::fixed
+              << std::setprecision(10) << d2m_op[m][n] << " ";
     }
+    outs << "\n";
+  }
+  chi_log.Log() << outs.str();
 
-    int mc=-1; //moment count
-    for (int ell=0; ell<=scatt_order; ell++)
-    {
-        for (int m = -ell; m <= ell; m++)
-        {
-            std::vector<double> cur_mom; mc++;
-            num_moms++;
+  file.close();
 
-            for (int n = 0; n < num_angles; n++)
-            {
-                file >> a;
-                double value = a;
-                cur_mom.push_back(value);
-//                chi_log.Log() << value;
-            }
-
-            d2m_op.push_back(cur_mom);
-        }//for m
-    }//for ell
-
-    std::stringstream outs;
-    outs
-            << "\nQuadrature d2m operator:\n";
-    for (int n=0; n<num_angles; n++)
-    {
-        outs << std::setw(5) << n;
-        for (int m=0; m<num_moms; m++)
-        {
-            outs
-                    << std::setw(15) << std::left << std::fixed
-                    << std::setprecision(10) << d2m_op[m][n] << " ";
-        }
-        outs << "\n";
-    }
-    chi_log.Log() << outs.str();
-
-    file.close();
-
-    chi_log.Log() << "Goodbye";
+  chi_log.Log() << "Goodbye";
 }
 void chi_math::GrissomCustomQuadrature::BuildMomentToDiscreteOperator(int scatt_order, bool oneD)
 {
@@ -79,7 +80,7 @@ void chi_math::GrissomCustomQuadrature::BuildMomentToDiscreteOperator(int scatt_
     m2d_op.clear();
 
     std::ifstream file;
-    file.open(filename);
+    file.open(M2D_file);
     if (not file.is_open())
     {
         chi_log.Log(LOG_ALLERROR) << "Failed to open Quadrature File in call to " << __FUNCTION__ << ".";
@@ -108,7 +109,7 @@ void chi_math::GrissomCustomQuadrature::BuildMomentToDiscreteOperator(int scatt_
 
     std::stringstream outs;
     outs
-            << "\nQuadrature d2m operator:\n";
+            << "\nQuadrature m2d operator:\n";
     for (int n=0; n<num_angles; n++)
     {
         outs << std::setw(5) << n;
@@ -136,21 +137,26 @@ int chiCreateGrissomCustomQuadrature(lua_State* L)
 
 //    printf("Hello World");
 
-    int num_args = lua_gettop(L);
-    if (num_args != 1)
-        LuaPostArgAmountError(__FUNCTION__ , 1, num_args);
+//    int num_args = lua_gettop(L);
+//    if (num_args != 1)
+//        LuaPostArgAmountError(__FUNCTION__ , 1, num_args);
 
-    const char* file_name_raw = lua_tostring(L, 1);
-    std::string file_name(file_name_raw);
+    const char* file_name_raw1 = lua_tostring(L, 1);
+    std::string quad_file(file_name_raw1);
+    const char* file_name_raw2 = lua_tostring(L, 2);
+    std::string M2D_file(file_name_raw2);
+    const char* file_name_raw3 = lua_tostring(L, 3);
+    std::string D2M_file(file_name_raw3);
+
     std::ifstream file;
-    file.open(file_name);
+    file.open(quad_file);
     if (not file.is_open())
     {
         chi_log.Log(LOG_ALLERROR) << "Failed to open Quadrature File in call to " << __FUNCTION__ << ".";
         exit(EXIT_FAILURE);
     }
 
-    auto new_quad = std::make_shared<chi_math::GrissomCustomQuadrature>(file_name);
+    auto new_quad = std::make_shared<chi_math::GrissomCustomQuadrature>(quad_file, M2D_file, D2M_file);
     chi_math::QuadraturePointPhiTheta q_points;
 
     float a;

@@ -95,7 +95,7 @@ end
 
 --========== ProdQuad
 pquad = chiCreateProductQuadrature(GAUSS_LEGENDRE_CHEBYSHEV,2, 2)
-pquad2 = chiCreateProductQuadrature(GAUSS_LEGENDRE_CHEBYSHEV,5, 5)
+--pquad2 = chiCreateProductQuadrature(GAUSS_LEGENDRE_CHEBYSHEV,5, 5)
 
 --========== Groupset def
 gs0 = chiLBSCreateGroupset(phys1)

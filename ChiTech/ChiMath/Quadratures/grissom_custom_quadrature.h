@@ -12,12 +12,17 @@ namespace chi_math
     class GrissomCustomQuadrature : public AngularQuadrature
     {
     private:
-        const std::string filename;
+        const std::string quad_file;
+        const std::string M2D_file;
+        const std::string D2M_file;
+
     public:
         explicit
-        GrissomCustomQuadrature(std::string& in_filename) :
+        GrissomCustomQuadrature(std::string& in_filename1, std::string& in_filename2, std::string& in_filename3) :
         AngularQuadrature(AngularQuadratureType::Arbitrary),
-        filename(in_filename)
+        quad_file(in_filename1),
+        M2D_file(in_filename2),
+        D2M_file(in_filename3)
         {}
 
         void BuildDiscreteToMomentOperator(int scatt_order, bool oneD) override;
