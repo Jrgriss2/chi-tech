@@ -37,6 +37,7 @@ void chi_math::AngularQuadrature::
     new_pair.phi   = azimuthal[i];
     new_pair.theta = polar[i];
 
+
     abscissae.push_back(new_pair);
 
     double weight = in_weights[i];
@@ -132,15 +133,9 @@ void chi_math::AngularQuadrature::
   d2m_op_built = true;
 
 
-
-
-
-
-
-  //=================================== Verbose printout
   std::stringstream outs;
   outs
-    << "\nQuadrature d2m operator:\n";
+  << "\nQuadrature d2m operator:\n";
   for (int n=0; n<num_angles; n++)
   {
     outs << std::setw(5) << n;
@@ -152,8 +147,28 @@ void chi_math::AngularQuadrature::
     }
     outs << "\n";
   }
+  chi_log.Log() << outs.str();
 
-  chi_log.Log(LOG_0VERBOSE_1) << outs.str();
+
+
+
+  //=================================== Verbose printout
+//  std::stringstream outs;
+//  outs
+//    << "\nQuadrature d2m operator:\n";
+//  for (int n=0; n<num_angles; n++)
+//  {
+//    outs << std::setw(5) << n;
+//    for (int m=0; m<num_moms; m++)
+//    {
+//      outs
+//        << std::setw(15) << std::left << std::fixed
+//        << std::setprecision(10) << d2m_op[m][n] << " ";
+//    }
+//    outs << "\n";
+//  }
+//
+//  chi_log.Log(LOG_0VERBOSE_1) << outs.str();
 }
 
 //###################################################################
@@ -193,11 +208,10 @@ void chi_math::AngularQuadrature::
   }//for m
   m2d_op_built = true;
 
-  //=================================== Verbose printout
-  std::stringstream outs;
 
+  std::stringstream outs;
   outs
-    << "\nQuadrature m2d operator:\n";
+  << "\nQuadrature m2d operator:\n";
   for (int n=0; n<num_angles; n++)
   {
     outs << std::setw(5) << n;
@@ -209,6 +223,24 @@ void chi_math::AngularQuadrature::
     }
     outs << "\n";
   }
+  chi_log.Log() << outs.str();
 
-  chi_log.Log(LOG_0VERBOSE_1) << outs.str();
+  //=================================== Verbose printout
+//  std::stringstream outs;
+
+//  outs
+//    << "\nQuadrature m2d operator:\n";
+//  for (int n=0; n<num_angles; n++)
+//  {
+//    outs << std::setw(5) << n;
+//    for (int m=0; m<num_moms; m++)
+//    {
+//      outs
+//        << std::setw(15) << std::left << std::fixed
+//        << std::setprecision(10) << m2d_op[m][n] << " ";
+//    }
+//    outs << "\n";
+//  }
+//
+//  chi_log.Log(LOG_0VERBOSE_1) << outs.str();
 }

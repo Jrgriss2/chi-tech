@@ -210,6 +210,9 @@ void chi_math::ProductQuadrature::InitializeWithGLC(int Na, int Np, bool verbose
       weights.push_back(weight);
       weight_sum += weight;
 
+      chi_log.Log() << "Here";
+      chi_log.Log() << weight << "   "  << new_pair.phi << "    " << new_pair.theta;
+
       if (verbose)
       {
         char buf[200];

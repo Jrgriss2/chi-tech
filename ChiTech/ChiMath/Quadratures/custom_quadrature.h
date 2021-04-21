@@ -25,8 +25,9 @@ namespace chi_math
         D2M_file(in_filename3)
         {}
 
-        void BuildDiscreteToMomentOperator(int scatt_order, bool oneD) override;
-        void BuildMomentToDiscreteOperator(int scatt_order, bool oneD) override;
+        void BuildDiscreteToMomentOperator(int scatt_order, int dimension) override;
+        void BuildMomentToDiscreteOperator(int scatt_order, int dimension) override;
+        void MakeHarmonicIndices(int scatt_order, int dimension) override;
     };
 }
 

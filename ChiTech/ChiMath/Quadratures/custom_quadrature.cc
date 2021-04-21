@@ -11,16 +11,56 @@ extern ChiLog& chi_log;
 extern ChiMath& chi_math_handler;
 
 void chi_math::CustomQuadrature::
-  BuildDiscreteToMomentOperator(int scatt_order, bool oneD)
+MakeHarmonicIndices(int scatt_order, int dimension)
+{
+  if (m_to_ell_em_map.empty())
+  {
+    if (dimension == 1)
+      for (int ell=0; ell<=scatt_order; ell++)
+        m_to_ell_em_map.emplace_back(ell,0);
+    else if (dimension == 2)
+      for (int ell=0; ell<=scatt_order; ell++)
+        if (ell == scatt_order)
+        {
+          for (int m=-ell; m < 0; m+=2)
+          {
+            m_to_ell_em_map.emplace_back(ell,m);
+          }
+        }
+        else
+        {
+          for (int m=-ell; m<=ell; m+=2)
+          {
+            m_to_ell_em_map.emplace_back(ell,m);
+          }
+        }
+//    else if (dimension == 2)
+//      for (int ell=0; ell<=scatt_order; ell++)
+//        for (int m=-ell; m<=ell; m+=2)
+//        {
+//          if (ell == 0 or m != 0)
+//            m_to_ell_em_map.emplace_back(ell,m);
+//        }
+    else if (dimension == 3)
+      for (int ell=0; ell<=scatt_order; ell++)
+        for (int m=-ell; m<=ell; m++)
+          m_to_ell_em_map.emplace_back(ell,m);
+  }
+}
+
+void chi_math::CustomQuadrature::
+  BuildDiscreteToMomentOperator(int scatt_order, int dimension)
 {
   chi_log.Log() << "Hello";
 
-  int num_angles = abscissae.size();
-  int num_moms = 0;
+//  MakeHarmonicIndices(scatt_order,dimension);
+//
+//  int num_angles = abscissae.size();
+//  int num_moms = 0;
   float a;
-
-  d2m_op.clear();
-
+//
+//  d2m_op.clear();
+//
   std::ifstream file;
   file.open(D2M_file);
   if (not file.is_open())
@@ -28,26 +68,53 @@ void chi_math::CustomQuadrature::
     chi_log.Log(LOG_ALLERROR) << "Failed to open Quadrature File in call to " << __FUNCTION__ << ".";
     exit(EXIT_FAILURE);
   }
+//
+  file >> a;
+  double moments = a;
+//
+//  int mc=-1; //moment count
+//  for (int ell=0; ell < moments; ell++)
+//  {
+//      std::vector<double> cur_mom; mc++;
+//      num_moms++;
+//
+//      for (int n = 0; n < num_angles; n++)
+//      {
+//        file >> a;
+//        double value = a;
+//        cur_mom.push_back(value);
+////      chi_log.Log() << value;
+//      }
+//
+//      d2m_op.push_back(cur_mom);
+//  }//for ell
 
-  int mc=-1; //moment count
-  for (int ell=0; ell<=scatt_order; ell++)
+  if (d2m_op_built) return;
+
+  d2m_op.clear();
+  MakeHarmonicIndices(scatt_order,dimension);
+
+  int num_angles = abscissae.size();
+  int num_moms = m_to_ell_em_map.size();
+
+  for (const auto& ell_em : m_to_ell_em_map)
   {
-    for (int m = -ell; m <= ell; m++)
+    std::vector<double> cur_mom;
+    cur_mom.reserve(num_angles);
+
+    for (int n=0; n<num_angles; n++)
     {
-      std::vector<double> cur_mom; mc++;
-      num_moms++;
+      const auto& cur_angle = abscissae[n];
 
-      for (int n = 0; n < num_angles; n++)
-      {
-        file >> a;
-        double value = a;
-        cur_mom.push_back(value);
-//      chi_log.Log() << value;
-      }
+      file >> a;
+      double value = a;
+      double w = weights[n];
+      cur_mom.push_back(value);
+    }
 
-      d2m_op.push_back(cur_mom);
-    }//for m
-  }//for ell
+    d2m_op.push_back(cur_mom);
+  }
+  d2m_op_built = true;
 
   std::stringstream outs;
   outs
@@ -69,16 +136,18 @@ void chi_math::CustomQuadrature::
 
   chi_log.Log() << "Goodbye";
 }
-void chi_math::CustomQuadrature::BuildMomentToDiscreteOperator(int scatt_order, bool oneD)
+void chi_math::CustomQuadrature::BuildMomentToDiscreteOperator(int scatt_order, int dimension)
 {
     chi_log.Log() << "Hello";
 
-    int num_angles = abscissae.size();
-    int num_moms = 0;
+//    MakeHarmonicIndices(scatt_order,dimension);
+//
+//    int num_angles = abscissae.size();
+//    int num_moms = 0;
     float a;
-
-    m2d_op.clear();
-
+//
+//    m2d_op.clear();
+//
     std::ifstream file;
     file.open(M2D_file);
     if (not file.is_open())
@@ -87,25 +156,56 @@ void chi_math::CustomQuadrature::BuildMomentToDiscreteOperator(int scatt_order, 
         exit(EXIT_FAILURE);
     }
 
-    int mc=-1; //moment count
-    for (int ell=0; ell<=scatt_order; ell++)
+    file >> a;
+    double moments = a;
+//
+//    int mc=-1; //moment count
+//    for (int ell=0; ell<moments; ell++)
+//    {
+//            std::vector<double> cur_mom; mc++;
+//            num_moms++;
+//
+//            for (int n = 0; n < num_angles; n++)
+//            {
+//                file >> a;
+//                double value = a;
+//                cur_mom.push_back(value);
+////                chi_log.Log() << value;
+//            }
+//
+//            m2d_op.push_back(cur_mom);
+//    }//for ell
+
+
+  if (m2d_op_built) return;
+
+  m2d_op.clear();
+  MakeHarmonicIndices(scatt_order,dimension);
+
+  int num_angles = abscissae.size();
+  int num_moms = m_to_ell_em_map.size();
+
+  double normalization = 1.0;
+  if (dimension == 1) normalization = 2.0;
+  if (dimension == 2) normalization = 4.0*M_PI;
+  if (dimension == 3) normalization = 4.0*M_PI;
+
+  for (const auto& ell_em : m_to_ell_em_map)
+  {
+    std::vector<double> cur_mom;
+    cur_mom.reserve(num_angles);
+
+    for (int n=0; n<num_angles; n++)
     {
-        for (int m = -ell; m <= ell; m++)
-        {
-            std::vector<double> cur_mom; mc++;
-            num_moms++;
+      const auto& cur_angle = abscissae[n];
+      file >> a;
+      double value = a;
+      cur_mom.push_back(value);
+    }
 
-            for (int n = 0; n < num_angles; n++)
-            {
-                file >> a;
-                double value = a;
-                cur_mom.push_back(value);
-//                chi_log.Log() << value;
-            }
-
-            m2d_op.push_back(cur_mom);
-        }//for m
-    }//for ell
+    m2d_op.push_back(cur_mom);
+  }//for m
+  m2d_op_built = true;
 
     std::stringstream outs;
     outs
@@ -132,7 +232,7 @@ void chi_math::CustomQuadrature::BuildMomentToDiscreteOperator(int scatt_order, 
 // #########################################################################################
 // #########################################################################################
 
-int chiCreateGrissomCustomQuadrature(lua_State* L)
+int chiCreateCustomQuadrature(lua_State* L)
 {
 
 //    printf("Hello World");
@@ -160,19 +260,22 @@ int chiCreateGrissomCustomQuadrature(lua_State* L)
     chi_math::QuadraturePointPhiTheta q_points;
 
     float a;
+    chi_log.Log() << "Quad Points (w, phi, theta):";
     while(file >> a)
     {
+        double weight = a;
+        file >> a;
         q_points.phi = a;
         file >> a;
         q_points.theta = a;
-//        chi_log.Log() << "Here";
+        chi_log.Log() << weight << "   "  << q_points.phi << "   " << q_points.theta;
 //        chi_log.Log() << q_points.theta;
         double x = sin(q_points.theta)*cos(q_points.phi);
         double y = sin(q_points.theta)*sin(q_points.phi);
         double z = cos(q_points.theta);
 
         new_quad->abscissae.push_back(q_points);
-        new_quad->weights.push_back(1.0);
+        new_quad->weights.push_back(weight);
         new_quad->omegas.emplace_back(x, y, z);
     }
 //    q_points.phi = 0.5;

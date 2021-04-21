@@ -94,7 +94,7 @@ for g=1,num_groups do
 end
 
 --========== ProdQuad
-pquad = chiCreateGrissomCustomQuadrature("ChiTest/Test_GLC_Quad.txt", "ChiTest/Test_M2D.txt", "ChiTest/Test_D2M.txt")
+pquad = chiCreateCustomQuadrature("ChiTest/Test_GLC_Quad.txt", "ChiTest/Test_GLC_M2D.txt", "ChiTest/Test_GLC_D2M.txt")
 --pquad2 = chiCreateProductQuadrature(GAUSS_LEGENDRE_CHEBYSHEV,5, 5)
 
 --========== Groupset def
